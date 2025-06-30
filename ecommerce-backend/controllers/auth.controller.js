@@ -18,11 +18,10 @@ const signup = async (req, res) => {
     const existingUser = await User.findOne({ username });
     if (existingUser) return res.status(400).json({ message: 'Username already exists' });
 
-    // ✅ Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    
 
     // ✅ Create and save user
-    const newUser = new User({ username, password: hashedPassword, email, phone });
+    const newUser = new User({ username, password: password, email, phone });
     await newUser.save();
 
     res.status(201).json({ message: 'User registered successfully', userId: newUser._id });
@@ -47,7 +46,7 @@ const login = async (req, res) => {
     if (!user) return res.status(400).json({ message: 'Invalid username or password' });
 
     // ✅ Compare password
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await user.comparePassword(password, user.password);
     if (!isMatch) return res.status(400).json({ message: 'Invalid username or password' });
 
     // ✅ Generate JWT
